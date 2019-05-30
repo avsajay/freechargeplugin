@@ -20,6 +20,8 @@ public class freechargeplugin extends CordovaPlugin {
             return true;
         }
         return false;
+		
+		
     }
 
     private void coolMethod(String message, CallbackContext callbackContext) {
