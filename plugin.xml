@@ -10,8 +10,7 @@
             <param name="android-package" value="cordova.plugin.freecharge.freechargeplugin" />
          </feature>
       </config-file>
-      <config-file parent="/*" target="AndroidManifest.xml" />
-       <framework custom="true" src="src/android/freecharge.gradle" type="gradleReference" />
+      <config-file parent="/*" target="AndroidManifest.xml" />     
       <source-file src="src/android/freechargeplugin.java" target-dir="src/cordova/plugin/freecharge" />
    </platform>
 </plugin>
