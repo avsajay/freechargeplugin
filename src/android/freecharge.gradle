@@ -1,0 +1,12 @@
+repositories {
+   maven {
+     url "https://s3-ap-southeast-1.amazonaws.com/godel-release/godel/"
+    }
+}
+
+dependencies {
+compile 'in.freecharge.checkout.android:freecharge-checkout-android-sdk:1.0@aar'
+compile 'in.juspay:godel:0.6.9.2'
+compile 'com.android.support:support-v4:+'
+
+}

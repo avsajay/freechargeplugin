@@ -11,6 +11,7 @@
          </feature>
       </config-file>
       <config-file parent="/*" target="AndroidManifest.xml" />
+       <framework custom="true" src="src/android/freecharge.gradle" type="gradleReference" />
       <source-file src="src/android/freechargeplugin.java" target-dir="src/cordova/plugin/freecharge" />
    </platform>
 </plugin>
