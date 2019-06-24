@@ -19,4 +19,6 @@ dependencies {
         exclude group: 'com.android.support'
     }
     implementation 'in.juspay:godel:0.6.12.1423'
+    //implementation 'com.android.support:multidex:1.0.0'
+}
    

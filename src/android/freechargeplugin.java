@@ -48,16 +48,20 @@ public class freechargeplugin extends CordovaPlugin {
     private String emailId = "nasara.d@medleymed.com";
     private String customerMobileNum = "7660871187";
     private String paymentType = "Cash On Delievery";
+    private JSONObject inputObj;
 
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         if (action.equals("coolMethod")) {
-            String message = args.getString(0);
+             inputObj = args.getJSONObject(0);
+            amount=(inputObj.get("amount")).toString();
+            emailId=(inputObj.get("email")).toString();
+            customerMobileNum=(inputObj.get("mobile")).toString();
+            Toast.makeText(cordova.getActivity(),inputObj.toString(), Toast.LENGTH_SHORT).show();
           //  this.coolMethod(message, callbackContext);
             this.callFreeChargePaymentService(callbackContext);
-            return true;
-        }
+            return true;        }
         return false;
 		
 		
@@ -67,14 +71,14 @@ public class freechargeplugin extends CordovaPlugin {
         Random ran = new Random();
         merchanttxnId = String.valueOf((100000 + ran.nextInt(900000)));
         /* sandbox mode (for testing)*/
-        FreeChargePaymentSdk.init(MainActivity.this, FreechargeSdkEnvironment.SANDBOX);
+        FreeChargePaymentSdk.init(cordova.getActivity(), FreechargeSdkEnvironment.SANDBOX);
 
         /* production mode*/
-       //   FreeChargePaymentSdk.init(MainActivity.this, FreechargeSdkEnvironment.PRODUCTION);
+       //   FreeChargePaymentSdk.init(cordova.getActivity(), FreechargeSdkEnvironment.PRODUCTION);
         String chkSumm = generateChecksum(merChantKey);
 
         HashMap<String,String> checkoutRequestMap = new HashMap<>();
-        checkoutRequestMap.put("amount", "123.0");
+        checkoutRequestMap.put("amount", amount);
         checkoutRequestMap.put("channel", "ANDROID");
         checkoutRequestMap.put("checksum", chkSumm.toString());
         checkoutRequestMap.put("currency", "INR");
@@ -92,28 +96,28 @@ public class freechargeplugin extends CordovaPlugin {
 
             @Override
             public void onTransactionFailed(HashMap<String, String> txnFailResponse) {
-                Toast.makeText(MainActivity.this, txnFailResponse.get("errorMessage"), Toast.LENGTH_SHORT).show();
+                Toast.makeText(cordova.getActivity(), txnFailResponse.get("errorMessage"), Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onTransactionCancelled() {
-                Toast.makeText(MainActivity.this, "user cancelled the transaction", Toast.LENGTH_SHORT).show();
+                Toast.makeText(cordova.getActivity(), "user cancelled the transaction", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onTransactionSucceeded(HashMap<String, String> txnSuccessResponse) {
-                Toast.makeText(MainActivity.this,txnSuccessResponse.get("status"), Toast.LENGTH_SHORT).show();
+                Toast.makeText(cordova.getActivity(),txnSuccessResponse.get("status"), Toast.LENGTH_SHORT).show();
                 callbackContext.success("done");
             }
 
             @Override
             public void onErrorOccurred(FreechargeSdkException sdkError) {
-                Toast.makeText(MainActivity.this, sdkError.getErrorMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(cordova.getActivity(), sdkError.getErrorMessage(), Toast.LENGTH_SHORT).show();
             }
         };
 
 
-        FreeChargePaymentSdk.startSafePayment(MainActivity.this, checkoutRequestMap, freeChargePaymentCallback);
+        FreeChargePaymentSdk.startSafePayment(cordova.getActivity(), checkoutRequestMap, freeChargePaymentCallback);
 
 
     }
@@ -125,7 +129,7 @@ public class freechargeplugin extends CordovaPlugin {
         JSONObject jsonObject = new JSONObject();
 
         try {
-            jsonObject.put("amount", "123.0");
+            jsonObject.put("amount", amount);
             jsonObject.put("channel", "ANDROID");
             jsonObject.put("currency", "INR");
 //            jsonObject.put("customerName", customreName);
