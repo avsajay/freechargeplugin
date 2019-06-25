@@ -37,7 +37,8 @@ public class freechargeplugin extends CordovaPlugin {
 
     private String checkSumNew = "";
     ///20d9216b-60b5-423a-a808-f33aaf713c01
-    private String merChantKey = "20d9216b-60b5-423a-a808-f33aaf713c01";
+   // private String merChantKey = "20d9216b-60b5-423a-a808-f33aaf713c01"; //sandbox
+  private String merChantKey ="0ca894ca-e895-4b14-8913-223f9695cbdc";    //production
     //  private String merchanttxnId = "1286049";
     // private String merchanttxnId = "1666332";
     //   private String merchanttxnId= String.valueOf(1000000 + random_float() * 9000000);
@@ -50,31 +51,31 @@ public class freechargeplugin extends CordovaPlugin {
     private String paymentType = "Cash On Delievery";
     private JSONObject inputObj;
 
-
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         if (action.equals("coolMethod")) {
-             inputObj = args.getJSONObject(0);
-            amount=(inputObj.get("amount")).toString();
-            emailId=(inputObj.get("email")).toString();
-            customerMobileNum=(inputObj.get("mobile")).toString();
-            Toast.makeText(cordova.getActivity(),inputObj.toString(), Toast.LENGTH_SHORT).show();
+          inputObj = args.getJSONObject(0);
+          amount=(inputObj.get("amount")).toString();
+          emailId=(inputObj.get("email")).toString();
+          customerMobileNum=(inputObj.get("mobile")).toString();
+          Toast.makeText(cordova.getActivity(),inputObj.toString(), Toast.LENGTH_SHORT).show();
           //  this.coolMethod(message, callbackContext);
             this.callFreeChargePaymentService(callbackContext);
-            return true;        }
+            return true;
+        }
         return false;
-		
-		
+
+
     }
 
     private void callFreeChargePaymentService(CallbackContext callbackContext) {
         Random ran = new Random();
         merchanttxnId = String.valueOf((100000 + ran.nextInt(900000)));
         /* sandbox mode (for testing)*/
-        FreeChargePaymentSdk.init(cordova.getActivity(), FreechargeSdkEnvironment.SANDBOX);
+       // FreeChargePaymentSdk.init(cordova.getActivity(), FreechargeSdkEnvironment.SANDBOX);
 
         /* production mode*/
-       //   FreeChargePaymentSdk.init(cordova.getActivity(), FreechargeSdkEnvironment.PRODUCTION);
+         FreeChargePaymentSdk.init(cordova.getActivity(), FreechargeSdkEnvironment.PRODUCTION);
         String chkSumm = generateChecksum(merChantKey);
 
         HashMap<String,String> checkoutRequestMap = new HashMap<>();
@@ -96,23 +97,59 @@ public class freechargeplugin extends CordovaPlugin {
 
             @Override
             public void onTransactionFailed(HashMap<String, String> txnFailResponse) {
-                Toast.makeText(cordova.getActivity(), txnFailResponse.get("errorMessage"), Toast.LENGTH_SHORT).show();
+                Toast.makeText(cordova.getActivity(), txnFailResponse.toString(), Toast.LENGTH_SHORT).show();
+              JSONObject resultObj = new JSONObject();
+              try {
+                resultObj.put("message",  txnFailResponse.toString());
+                resultObj.put("status", "failed");
+              } catch (JSONException e) {
+                e.printStackTrace();
+              }
+              callbackContext.success(resultObj);
             }
 
             @Override
             public void onTransactionCancelled() {
                 Toast.makeText(cordova.getActivity(), "user cancelled the transaction", Toast.LENGTH_SHORT).show();
+              JSONObject resultObj = new JSONObject();
+              try {
+                resultObj.put("message", "You Cancelled the transaction");
+                resultObj.put("status", "cancelled");
+              } catch (JSONException e) {
+                e.printStackTrace();
+              }
+              callbackContext.success(resultObj);
             }
 
             @Override
             public void onTransactionSucceeded(HashMap<String, String> txnSuccessResponse) {
-                Toast.makeText(cordova.getActivity(),txnSuccessResponse.get("status"), Toast.LENGTH_SHORT).show();
-                callbackContext.success("done");
+                Toast.makeText(cordova.getActivity(),txnSuccessResponse.toString(), Toast.LENGTH_SHORT).show();
+                String transactionId = txnSuccessResponse.get("txnId");
+                String  resultAmount = txnSuccessResponse.get("amount");
+                String transactionStatus = txnSuccessResponse.get("status");
+              JSONObject resultObj = new JSONObject();
+              try {
+                resultObj.put("amount", resultAmount);
+                resultObj.put("transactionId", transactionId);
+                resultObj.put("trstatus", transactionStatus);
+                resultObj.put("status", "success");
+              } catch (JSONException e) {
+                e.printStackTrace();
+              }
+                callbackContext.success(resultObj);
             }
 
             @Override
             public void onErrorOccurred(FreechargeSdkException sdkError) {
-                Toast.makeText(cordova.getActivity(), sdkError.getErrorMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(cordova.getActivity(), sdkError.toString(), Toast.LENGTH_SHORT).show();
+              JSONObject resultObj = new JSONObject();
+              try {
+                resultObj.put("message", sdkError.toString());
+                resultObj.put("status", "error");
+              } catch (JSONException e) {
+                e.printStackTrace();
+              }
+              callbackContext.success(resultObj);
             }
         };
 
@@ -181,12 +218,12 @@ builder.setMessage("Look at this dialog!")
        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
            public void onClick(DialogInterface dialog, int id) {
                 //do things
-                 callbackContext.success(message);	
+                 callbackContext.success(message);
            }
        });
 AlertDialog alert = builder.create();
 alert.show();
-           	
+
         } else {
             callbackContext.error("Expected one non-empty string argument.");
         }
