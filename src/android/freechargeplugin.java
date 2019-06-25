@@ -38,18 +38,19 @@ public class freechargeplugin extends CordovaPlugin {
     private String checkSumNew = "";
     ///20d9216b-60b5-423a-a808-f33aaf713c01
    // private String merChantKey = "20d9216b-60b5-423a-a808-f33aaf713c01"; //sandbox
-  private String merChantKey ="0ca894ca-e895-4b14-8913-223f9695cbdc";    //production
+  private String merChantKey ="";    //production
     //  private String merchanttxnId = "1286049";
     // private String merchanttxnId = "1666332";
     //   private String merchanttxnId= String.valueOf(1000000 + random_float() * 9000000);
-    private String merchantId = "8BVX0d9apMDTfn";
-    private String amount = "10";
+    private String merchantId = "";
+    private String amount = "";
     private String customreName = "Nasara";
     // email@medley.com
-    private String emailId = "nasara.d@medleymed.com";
-    private String customerMobileNum = "7660871187";
+    private String emailId = "";
+    private String customerMobileNum = "";
     private String paymentType = "Cash On Delievery";
     private JSONObject inputObj;
+    private String mode="";
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
@@ -58,6 +59,9 @@ public class freechargeplugin extends CordovaPlugin {
           amount=(inputObj.get("amount")).toString();
           emailId=(inputObj.get("email")).toString();
           customerMobileNum=(inputObj.get("mobile")).toString();
+          merchantId=(inputObj.get("merchantId")).toString();
+          merChantKey=(inputObj.get("merChantKey")).toString();
+          mode=(inputObj.get("mode")).toString();
           Toast.makeText(cordova.getActivity(),inputObj.toString(), Toast.LENGTH_SHORT).show();
           //  this.coolMethod(message, callbackContext);
             this.callFreeChargePaymentService(callbackContext);
@@ -71,24 +75,27 @@ public class freechargeplugin extends CordovaPlugin {
     private void callFreeChargePaymentService(CallbackContext callbackContext) {
         Random ran = new Random();
         merchanttxnId = String.valueOf((100000 + ran.nextInt(900000)));
-        /* sandbox mode (for testing)*/
-       // FreeChargePaymentSdk.init(cordova.getActivity(), FreechargeSdkEnvironment.SANDBOX);
 
-        /* production mode*/
-         FreeChargePaymentSdk.init(cordova.getActivity(), FreechargeSdkEnvironment.PRODUCTION);
-        String chkSumm = generateChecksum(merChantKey);
+        if(mode.toString().equals("sandbox")) {
+          /* sandbox mode (for testing)*/
+          FreeChargePaymentSdk.init(cordova.getActivity(), FreechargeSdkEnvironment.SANDBOX);
+        }else if(mode.toString().equals("prod")){
+          /* production mode*/
+          FreeChargePaymentSdk.init(cordova.getActivity(), FreechargeSdkEnvironment.PRODUCTION);
+        }
+        String chkSumm = generateChecksum(merChantKey.toString());
 
         HashMap<String,String> checkoutRequestMap = new HashMap<>();
-        checkoutRequestMap.put("amount", amount);
+        checkoutRequestMap.put("amount", amount.toString());
         checkoutRequestMap.put("channel", "ANDROID");
         checkoutRequestMap.put("checksum", chkSumm.toString());
         checkoutRequestMap.put("currency", "INR");
 //        checkoutRequestMap.put("customerName", customreName);
-        checkoutRequestMap.put("email", emailId);
+        checkoutRequestMap.put("email", emailId.toString());
         checkoutRequestMap.put("furl", "https://www.google.com");
-        checkoutRequestMap.put("merchantId", merchantId);
+        checkoutRequestMap.put("merchantId", merchantId.toString());
         checkoutRequestMap.put("merchantTxnId", merchanttxnId);
-        checkoutRequestMap.put("mobile", customerMobileNum);
+        checkoutRequestMap.put("mobile", customerMobileNum.toString());
         checkoutRequestMap.put("productInfo", "auth");
         checkoutRequestMap.put("surl", "https://www.google.com");
         Log.d("hash map ", "@@@@@@@@@@@@@@@    " + checkoutRequestMap);
@@ -166,16 +173,16 @@ public class freechargeplugin extends CordovaPlugin {
         JSONObject jsonObject = new JSONObject();
 
         try {
-            jsonObject.put("amount", amount);
+            jsonObject.put("amount", amount.toString());
             jsonObject.put("channel", "ANDROID");
             jsonObject.put("currency", "INR");
 //            jsonObject.put("customerName", customreName);
 //            jsonObject.put("customNote", "please make it fast...; !");
-            jsonObject.put("email", emailId);
+            jsonObject.put("email", emailId.toString());
             jsonObject.put("furl", "https://www.google.com");
-            jsonObject.put("merchantId", merchantId);
+            jsonObject.put("merchantId", merchantId.toString());
             jsonObject.put("merchantTxnId", merchanttxnId);
-            jsonObject.put("mobile", customerMobileNum);
+            jsonObject.put("mobile", customerMobileNum.toString());
             jsonObject.put("productInfo", "auth");
             jsonObject.put("surl", "https://www.google.com");
 
@@ -184,7 +191,7 @@ public class freechargeplugin extends CordovaPlugin {
             e.printStackTrace();
         }
 
-        String plainText = jsonObject.toString().concat(merchantKey).replace("\\/", "/");;
+        String plainText = jsonObject.toString().concat(merchantKey.toString()).replace("\\/", "/");;
 
         MessageDigest md = null;
 
@@ -221,8 +228,8 @@ builder.setMessage("Look at this dialog!")
                  callbackContext.success(message);
            }
        });
-AlertDialog alert = builder.create();
-alert.show();
+              AlertDialog alert = builder.create();
+              alert.show();
 
         } else {
             callbackContext.error("Expected one non-empty string argument.");
